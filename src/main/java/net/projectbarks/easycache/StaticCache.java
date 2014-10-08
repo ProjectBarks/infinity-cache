@@ -2,7 +2,6 @@ package net.projectbarks.easycache;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.lang.instrument.Instrumentation;
 
 /**
  * Created by brandon on 10/4/14.
@@ -16,7 +15,7 @@ public class StaticCache {
     static {
         cacheKeys = new ArrayList<String>();
         cacheValues = new ArrayList<CachedObject>();
-        maxSize = EasyCacheDiskUnit.Megabyte.getAmount(100);
+        maxSize = DiskUnit.Megabyte.getAmount(100);
     }
 
     /**
@@ -101,7 +100,7 @@ public class StaticCache {
         }
     }
 
-    public static void setMaxSize(EasyCacheDiskUnit unit, int amount) {
+    public static void setMaxSize(DiskUnit unit, int amount) {
         maxSize = unit.toBytes(amount);
     }
 
