@@ -1,5 +1,10 @@
 package net.projectbarks.easycache;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.lang.instrument.Instrumentation;
@@ -7,11 +12,20 @@ import java.lang.instrument.Instrumentation;
 /**
  * Created by brandon on 10/4/14.
  */
-public class StaticCache {
+public class EasyCache {
 
     private static List<String> cacheKeys;
     private static List<CachedObject> cacheValues;
-    private static long maxSize;
+    /**
+     * Max size is responsible in limiting the amount of ram/data your objects
+     * utilize. Max size is stored in bytes and can be converted using
+     * {@link net.projectbarks.easycache.EasyCacheDiskUnit disk unit} to units.
+     *
+     * @return max size is the long presentation of max size.
+     */
+    @Getter private static long maxSize;
+    @Getter @Setter private static long defaultUpdateTime;
+    @Getter @Setter private static long defaultLifetime;
 
     static {
         cacheKeys = new ArrayList<String>();
@@ -39,7 +53,10 @@ public class StaticCache {
         }
         long finalTime = System.currentTimeMillis() + unit.toMillis(lifetime);
         finalTime = lifetime <= -1 ? -1 : finalTime;
-        CachedObject cachedObject = new CachedObject(value, finalTime);
+        Gson gson = new GsonBuilder()
+            .serializeNulls()
+            .create();
+        CachedObject cachedObject = new CachedObject(value, finalTime, gson.toJson(value));
 
         int index = Collections.binarySearch(cacheValues, cachedObject);
         if (index < 0) index = ~index;
@@ -66,7 +83,8 @@ public class StaticCache {
         }
         T value;
         try {
-            value = type.cast(cacheValues.get(cacheKeys.indexOf(key)).getValue());
+            CachedObject cachedObject = cacheValues.get(cacheKeys.indexOf(key));
+            value = type.cast(cachedObject.getValue());
         } catch (ClassCastException exception) {
             exception.printStackTrace();
             throw new ClassCastException("Invalid type " + type.getName() + " for value!");
@@ -109,6 +127,7 @@ public class StaticCache {
         List<String> keysToRemove = new ArrayList<String>();
         ListIterator<CachedObject> li = cacheValues.listIterator(cacheValues.size());
         int index = cacheValues.size() - 1;
+
         while (li.hasPrevious()) {
             CachedObject entry = li.previous();
             if (entry.getLifeTime() <= -1) {

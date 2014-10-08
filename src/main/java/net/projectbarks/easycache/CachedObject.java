@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Cached object is utilized in the {@link net.projectbarks.easycache.StaticCache}
+ * Cached object is utilized in the {@link EasyCache}
  * to hold and serialize java objects. Gson is used to serialize the java object
  * to be de-serialize later.
  *
@@ -46,7 +46,7 @@ public class CachedObject implements Comparable<CachedObject> {
 
     /**
      * Cached object stores a wide range of data
-     * that is utilized by the {@link net.projectbarks.easycache.StaticCache} class
+     * that is utilized by the {@link EasyCache} class
      * for processes such as memory management, cache
      * deletion and so forth.
      *

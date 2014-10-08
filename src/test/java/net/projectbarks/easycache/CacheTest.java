@@ -17,14 +17,14 @@ public class CacheTest {
         String key_a = "Alpha", key_b = "Beta", key_c = "Charlie";
         Object value_a = 1, value_b = "String", value_c = Arrays.asList("One", "Two", "Three");
 
-        StaticCache.storeCacheObject(key_a, value_a, TimeUnit.MILLISECONDS, 5000L);
-        StaticCache.storeCacheObject(key_b, value_b, TimeUnit.SECONDS, 5L);
-        StaticCache.storeCacheObject(key_c, value_c);
+        EasyCache.storeCacheObject(key_a, value_a, TimeUnit.MILLISECONDS, 5000L);
+        EasyCache.storeCacheObject(key_b, value_b, TimeUnit.SECONDS, 5L);
+        EasyCache.storeCacheObject(key_c, value_c);
 
-        StaticCache.checkLifetime();
-        Assert.assertNotNull(StaticCache.getCacheObject(key_a, Integer.class));
-        Assert.assertNotNull(StaticCache.getCacheObject(key_b, String.class));
-        Assert.assertNotNull(StaticCache.getCacheObject(key_c, List.class));
+        EasyCache.checkLifetime();
+        Assert.assertNotNull(EasyCache.getCacheObject(key_a, Integer.class));
+        Assert.assertNotNull(EasyCache.getCacheObject(key_b, String.class));
+        Assert.assertNotNull(EasyCache.getCacheObject(key_c, List.class));
 
         try {
             Thread.sleep(5001L);
@@ -32,10 +32,10 @@ public class CacheTest {
             e.printStackTrace();
         }
 
-        StaticCache.checkLifetime();
-        Assert.assertNull(StaticCache.getCacheObject(key_a, Integer.class));
-        Assert.assertNull(StaticCache.getCacheObject(key_b, String.class));
-        Assert.assertNotNull(StaticCache.getCacheObject(key_c, List.class));
+        EasyCache.checkLifetime();
+        Assert.assertNull(EasyCache.getCacheObject(key_a, Integer.class));
+        Assert.assertNull(EasyCache.getCacheObject(key_b, String.class));
+        Assert.assertNotNull(EasyCache.getCacheObject(key_c, List.class));
     }
 
 }
