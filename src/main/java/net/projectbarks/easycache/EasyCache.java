@@ -18,7 +18,7 @@ public class EasyCache {
     /**
      * Max size is responsible in limiting the amount of ram/data your objects
      * utilize. Max size is stored in bytes and can be converted using
-     * {@link net.projectbarks.easycache.EasyCacheDiskUnit disk unit} to units.
+     * {@link net.projectbarks.easycache.DiskUnit disk unit} to units.
      *
      * @return max size is the long presentation of max size.
      */
