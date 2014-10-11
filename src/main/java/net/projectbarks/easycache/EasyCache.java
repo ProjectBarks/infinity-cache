@@ -77,7 +77,7 @@ public class EasyCache {
      * This function adds string-object pairs into a ConcurrentHashMap. The object
      * will undergo a serialization process and inserted into the map. The serialization
      * hard clones an object removing all references to the prior object.
-     * {@link #getCacheObject(String, Class) getCachedObject} can be called later to
+     * {@link #getCachedObject(String, Class) getCachedObject} can be called later to
      * demoralize the object and reuse it.
      *
      * Note it is important to have your object compatible with json or be a native object
@@ -95,7 +95,7 @@ public class EasyCache {
      * This function adds string-object pairs into a ConcurrentHashMap. The object
      * will undergo a serialization process and inserted into the map. The serialization
      * hard clones an object removing all references to the prior object.
-     * {@link #getCacheObject(String, Class) getCachedObject} can be called later to
+     * {@link #getCachedObject(String, Class) getCachedObject} can be called later to
      * demoralize the object and reuse it.
      *
      * Note it is important to have your object compatible with json or be a native object
@@ -116,7 +116,7 @@ public class EasyCache {
      * This function adds string-object pairs into a ConcurrentHashMap. The object
      * will undergo a serialization process and inserted into the map. The serialization
      * hard clones an object removing all references to the prior object.
-     * {@link #getCacheObject(String, Class) getCachedObject} can be called later to
+     * {@link #getCachedObject(String, Class) getCachedObject} can be called later to
      * demoralize the object and reuse it.
      *
      * Note it is important to have your object compatible with json or be a native object
@@ -127,9 +127,7 @@ public class EasyCache {
      * @param lifetime set how long a object lives for to be removed from cache.
      */
     public static void storeCacheObject(final String key, final Object value, TimeUnit lifetimeUnit, Long lifetime, TimeUnit updateUnit, Long updateTime) {
-        if (isNull(key, lifetime, updateTime)) {
-            throw new NullPointerException("You can not use a null value");
-        }
+        isNull(key, value, lifetimeUnit, updateUnit, updateTime, updateTime);
         long finalLifeTime = System.currentTimeMillis() + lifetimeUnit.toMillis(lifetime);
         String serialized = new GsonBuilder()
             .serializeNulls()
@@ -156,10 +154,8 @@ public class EasyCache {
      * @param <T> the return type you used in type
      * @return will return the casted value if it has not failed
      */
-    public static <T> T getCacheObject(final String key, Class<T> type) {
-        if (isNull(key, type)) {
-            throw new NullPointerException("You can not use a null" + (key == null ? "key" : "type"));
-        }
+    public static <T> T getCachedObject(final String key, Class<T> type) {
+        isNull(key);
         if (!cacheKeys.contains(key)) {
             return null;
         }
@@ -169,7 +165,6 @@ public class EasyCache {
             cachedObject.update();
             value = type.cast(cachedObject.getValue());
         } catch (ClassCastException exception) {
-            exception.printStackTrace();
             throw new ClassCastException("Invalid type " + type.getName() + " for value!");
         }
         return value;
@@ -194,9 +189,7 @@ public class EasyCache {
      * @return true if the object has been successfully found and removed
      */
     public static boolean deleteEntryFromCache(final String key) {
-        if (isNull(key)) {
-            throw new NullPointerException("You can not use a null key");
-        }
+        isNull(key);
         if(cacheKeys.contains(key)) {
             int i = cacheKeys.indexOf(key);
             int size = new GsonBuilder().serializeNulls().create().toJson(cacheKeys.get(i)).getBytes().length;
@@ -219,6 +212,7 @@ public class EasyCache {
      * @param amount of bytes in the specified unit.
      */
     public static void setMaxSize(DiskUnit unit, int amount) {
+        isNull(unit);
         maxSize = unit.toBytes(amount);
     }
 
@@ -232,6 +226,7 @@ public class EasyCache {
      * @param time the amount of time in the specified unit.
      */
     public static void setDefaultUpdateTime(TimeUnit unit, long time) {
+        isNull(unit);
         defaultUpdateTime = unit.toMillis(time);
     }
 
@@ -245,6 +240,7 @@ public class EasyCache {
      * @param time the amount of time in the specified unit.
      */
     public static void setDefaultLifetime(TimeUnit unit, long time) {
+        isNull(unit);
         defaultLifetime = unit.toMillis(time);
     }
 
@@ -286,7 +282,7 @@ public class EasyCache {
      * @param nulls list of objects to be checked.
      * @return true if a null object is found in the list.
      */
-    private static boolean isNull(Object... nulls) {
+    private static void isNull(Object... nulls) {
         boolean failed = false;
         for (Object o : nulls) {
             if (o != null) {
@@ -295,6 +291,8 @@ public class EasyCache {
             failed = true;
             break;
         }
-        return failed;
+        if (failed) {
+            throw new NullPointerException("Null input!");
+        }
     }
 }
