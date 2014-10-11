@@ -31,7 +31,7 @@ public class CacheTest {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
+        long time = System.currentTimeMillis();
         EasyCache.checkLifetime();
         Assert.assertNull(EasyCache.getCacheObject(key_a, Integer.class));
         Assert.assertNull(EasyCache.getCacheObject(key_b, String.class));
