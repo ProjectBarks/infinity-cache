@@ -1,5 +1,6 @@
 package net.projectbarks.easycache;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,14 +24,6 @@ public class CachedObject implements Comparable<CachedObject> {
      */
     @Getter private final Long lifeTime;
     /**
-     * Get the deletion time for an object if it has not been modified
-     * or has not been used under a certain amount of time.
-     *
-     * @param time sets the time the object will be erased if not updated.
-     * @return the time the object will be deleted.
-     */
-    @Getter @Setter private Long updateTime;
-    /**
      * The serialized value stored in the cached object that can be
      * converted back to its original form.
      *
@@ -38,11 +31,13 @@ public class CachedObject implements Comparable<CachedObject> {
      */
     @Getter private final Object value;
     /**
-     * The serialized form of {@link #getValue()}
-     * of the cached object. This can be used to
-     * rebuild the cached object later
+     * Get the deletion time for an object if it has not been modified
+     * or has not been used under a certain amount of time.
+     *
+     * @return the time the object will be deleted.
      */
-    @Getter private final String serializedValue;
+    @Getter private long updateTime;
+    @Getter(AccessLevel.PROTECTED) protected Long updateTimeExact;
 
     /**
      * Cached object stores a wide range of data
@@ -52,17 +47,18 @@ public class CachedObject implements Comparable<CachedObject> {
      *
      * @param value serialized value of the object
      * @param lifeTime time the object will be deleted
-     * @param serialized The serialized form of value
      */
-    public CachedObject(Object value, Long lifeTime, String serialized) {
+    public CachedObject(Object value, Long lifeTime, Long updateTime) {
         this.lifeTime = lifeTime;
+        this.updateTime = updateTime;
         this.value = value;
-        this.serializedValue = serialized;
+        update();
     }
 
     @Override
     public int compareTo(CachedObject o) {
-        return lifeTime.compareTo(o.getLifeTime());
+        return getLower().compareTo(o.getLower());
+
     }
 
     @Override
@@ -80,5 +76,23 @@ public class CachedObject implements Comparable<CachedObject> {
     @Override
     public int hashCode() {
         return value != null ? value.hashCode() : 0;
+    }
+
+    /**
+     * Tells that the object has been updated preventing deletion
+     * in the EasyCache class until the next deadline is hit.
+     */
+    protected void update() {
+        updateTimeExact = updateTime + System.currentTimeMillis();
+    }
+
+    /**
+     * Gets the lower time of both the updateTime and the the lifetime
+     * whichever value is closer to real time is chosen.
+     *
+     * @return lower time
+     */
+    protected Long getLower() {
+        return (lifeTime > updateTimeExact ? updateTimeExact : lifeTime);
     }
 }

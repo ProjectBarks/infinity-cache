@@ -20,7 +20,6 @@ public enum DiskUnit {
      *
      * @return the appropriate unit for the size of the memory used.
      */
-
     @Getter private String initial;
 
     /**
@@ -30,7 +29,6 @@ public enum DiskUnit {
      *
      * @return the size of the data object.
      */
-
     @Getter private Long size;
 
     /**
