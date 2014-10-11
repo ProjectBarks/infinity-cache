@@ -1,5 +1,6 @@
 package net.projectbarks.easycache;
 
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import lombok.Getter;
@@ -18,7 +19,7 @@ public class EasyCache {
     /**
      * Max size is responsible in limiting the amount of ram/data your objects
      * utilize. Max size is stored in bytes and can be converted using
-     * {@link net.projectbarks.easycache.EasyCacheDiskUnit disk unit} to units.
+     * {@link net.projectbarks.easycache.DiskUnit disk unit} to units.
      *
      * @return max size is the long presentation of max size.
      */
@@ -29,10 +30,12 @@ public class EasyCache {
     static {
         cacheKeys = new ArrayList<String>();
         cacheValues = new ArrayList<CachedObject>();
-        maxSize = DiskUnit.Megabyte.getAmount(100);
+        maxSize = DiskUnit.Megabyte.toBytes(100);
     }
 
     /**
+     *
+     * todo Write three different functions
      * This function adds string-object pairs into a ConcurrentHashMap. The object
      * will undergo a serialization process and inserted into the map. The serialization
      * hard clones an object removing all references to the prior object.
@@ -46,16 +49,16 @@ public class EasyCache {
      * @param value the value to be found for later
      * @param lifetime set how long a object lives for to be removed from cache.
      */
-    public static void storeCacheObject(final String key, final Object value, TimeUnit unit,  Long lifetime) {
-        if (isNull(key, lifetime)) {
-            throw new NullPointerException("You can not use a null" + (key == null ? "key" : "lifetime"));
+    public static void storeCacheObject(final String key, final Object value, TimeUnit lifetimeUnit, Long lifetime, TimeUnit updateUnit, Long updateTime) {
+        if (isNull(key, lifetime, updateTime)) {
+            throw new NullPointerException("You can not use a null value");
         }
-        long finalTime = System.currentTimeMillis() + unit.toMillis(lifetime);
-        finalTime = lifetime <= -1 ? -1 : finalTime;
+        long finalLifeTime = System.currentTimeMillis() + lifetimeUnit.toMillis(lifetime);
+        long finalUpdateTime = System.currentTimeMillis() + updateUnit.toMillis(updateTime);
         Gson gson = new GsonBuilder()
             .serializeNulls()
             .create();
-        CachedObject cachedObject = new CachedObject(value, finalTime, gson.toJson(value));
+        CachedObject cachedObject = new CachedObject(value, finalLifeTime, finalUpdateTime, gson.toJson(value));
 
         int index = Collections.binarySearch(cacheValues, cachedObject);
         if (index < 0) index = ~index;
@@ -92,6 +95,8 @@ public class EasyCache {
     }
 
     /**
+     *
+     * TODO add more documentation
      * This function will clear all previously stored cache. This will free up additional memory depending on how many
      * objects are stored.
      */
@@ -101,6 +106,7 @@ public class EasyCache {
     }
 
     /**
+     * TODO add more documentation
      * This function will delete a single entry from the cache. This will remove irrelevant information
      *
      * @param key the key to delete along with its associated value
@@ -118,10 +124,18 @@ public class EasyCache {
         }
     }
 
+    /**
+     * TODO add documentation
+     * @param unit
+     * @param amount
+     */
     public static void setMaxSize(DiskUnit unit, int amount) {
         maxSize = unit.toBytes(amount);
     }
 
+    /**
+     * todo Add documentation
+     */
     protected static void checkLifetime() {
         List<String> keysToRemove = new ArrayList<String>();
         ListIterator<CachedObject> li = cacheValues.listIterator(cacheValues.size());
@@ -132,7 +146,7 @@ public class EasyCache {
             if (entry.getLifeTime() <= -1) {
                 break;
             }
-            if (entry.getLifeTime() > System.currentTimeMillis()) {
+            if (entry.getLower() > System.currentTimeMillis()) {
                 break;
             }
             keysToRemove.add(cacheKeys.get(index));
@@ -145,6 +159,11 @@ public class EasyCache {
         }
     }
 
+    /**
+     * todo Add documentation
+     * @param nulls
+     * @return
+     */
     private static boolean isNull(Object... nulls) {
         boolean failed = false;
         for (Object o : nulls) {
