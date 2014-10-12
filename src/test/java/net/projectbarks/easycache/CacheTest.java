@@ -4,10 +4,10 @@ import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
-import org.junit.rules.TestWatcher;
-import org.junit.runner.Description;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -24,7 +24,8 @@ public class CacheTest {
     @UnitInfo(description = "Ensures lifetime works correctly!")
     public void testLifetime() {
         String key_a = "Alpha", key_b = "Beta", key_c = "Charlie";
-        Object value_a = 1, value_b = "String", value_c = Arrays.asList("One", "Two", "Three");
+        Integer value_a = 1;String value_b = "String";
+        List<String> value_c = Arrays.asList("One", "Two", "Three");
 
         EasyCache.storeCacheObject(key_a, value_a, TimeUnit.MILLISECONDS, 5000L);
         EasyCache.storeCacheObject(key_b, value_b, TimeUnit.SECONDS, 5L);
@@ -47,7 +48,7 @@ public class CacheTest {
     }
 
     @Test
-    @UnitInfo(description = "Ensures lifetime works correctly")
+    @UnitInfo(description = "Ensuring max size works on objects")
     public void testMaxStorage() {
         EasyCache.setMaxSize(DiskUnit.Byte, 1);
         try {
@@ -82,7 +83,7 @@ public class CacheTest {
     }
 
     @Test
-    @UnitInfo(description = "Insert a non existent key")
+    @UnitInfo(description = "Searching for a non existent key")
     public void testKeyNotFound() {
        if(EasyCache.getCachedObject("Invalid Key", java.lang.Class.class) != null){
            Assert.fail("Invalid Key not recognized!");
@@ -90,7 +91,7 @@ public class CacheTest {
     }
 
     @Test
-    @UnitInfo(description = "Test a problematic cast")
+    @UnitInfo(description = "Checking the results of a problematic cast")
     public void testClassCastException() {
         try{
             EasyCache.storeCacheObject("Key", 1000);
@@ -99,5 +100,35 @@ public class CacheTest {
             return;
         }
         Assert.fail("Null Class not detected!");
+    }
+
+    @Test
+    @UnitInfo(description = "Ensuring enabling update time works")
+    public void testEnablingUpdateTime() {
+        EasyCache.clearCache();
+        EasyCache.setAllowUpdateTime(false);
+        try {
+            ArrayList<String> before = getCacheKeys();
+            before = (ArrayList<String>) before.clone();
+            EasyCache.setAllowUpdateTime(true);
+            List<String> after = getCacheKeys();
+            for (int i = 0; i < 3; i++) {
+                System.out.println("Before: " + before.get(i) + " and After: " + after.get(i));
+                if (!before.get(i).equals(after.get(i))) {
+                    continue;
+                }
+                Assert.fail("Before: " + before.get(i) + " == After: " + after.get(i));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        EasyCache.setAllowUpdateTime(true);
+    }
+
+    private ArrayList<String> getCacheKeys() throws NoSuchFieldException, IllegalAccessException {
+        Field cacheKeys = EasyCache.class.getDeclaredField("cacheKeys");
+        cacheKeys.setAccessible(true);
+        return (ArrayList<String>) cacheKeys.get(null);
     }
 }

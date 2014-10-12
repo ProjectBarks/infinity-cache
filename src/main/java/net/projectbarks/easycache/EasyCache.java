@@ -49,7 +49,6 @@ public class EasyCache {
      */
     @Getter private static long defaultLifetime;
     /**
-     * todo fix later
      * Update time is optional and is not required to be used. Update Time can
      * not be null but will be ignored in the code and can be re-enabled at any
      * time.
@@ -58,10 +57,9 @@ public class EasyCache {
      * For example if you add an object before update time is re-enabled the update
      * time inserted will be used.
      *
-     * @param updateTime if update time is to be used.
      * @return if update time is enabled
      */
-    //@Getter @Setter private static boolean allowUpdateTime;
+    @Getter private static boolean allowUpdateTime;
 
     static {
         cacheKeys = new ArrayList<String>();
@@ -70,7 +68,7 @@ public class EasyCache {
         defaultLifetime = TimeUnit.HOURS.toMillis(1);
         defaultUpdateTime = TimeUnit.MINUTES.toMillis(5);
         usedSpace = 0;
-        //allowUpdateTime = false; todo fix later
+        allowUpdateTime = false;
     }
 
     /**
@@ -136,7 +134,7 @@ public class EasyCache {
             throw new RuntimeException("Max data has been used!");
         }
         usedSpace += serialized.getBytes().length;
-        CachedObject cachedObject = new CachedObject(value, finalLifeTime, updateUnit.toMillis(updateTime));
+        CachedObject cachedObject = new CachedObject(value, finalLifeTime, updateUnit.toMillis(updateTime), allowUpdateTime);
 
         int index = Collections.binarySearch(cacheValues, cachedObject);
         if (index < 0) index = ~index;
@@ -242,6 +240,40 @@ public class EasyCache {
     public static void setDefaultLifetime(TimeUnit unit, long time) {
         isNull(unit);
         defaultLifetime = unit.toMillis(time);
+    }
+
+    /**
+     * Update time is optional and is not required to be used. Update Time can
+     * not be null but will be ignored in the code and can be re-enabled at any
+     * time.
+     *
+     * Note: When re-enabling the Update Time all objects will be effected.
+     * For example if you add an object before update time is re-enabled the update
+     * time inserted will be used.
+     *
+     * <b>Warning! this function can cause lag depending if objects exist in the cache!
+     * It is only recommended to use this function before objects are stored!</b>
+     *
+     * @param allow if update time is to be used.
+     */
+    public static void setAllowUpdateTime(boolean allow) {
+        if (allowUpdateTime == allow) {
+            return;
+        }
+        allowUpdateTime = allow;
+        List<String> tempKeys = new ArrayList<String>();
+        List<CachedObject> tempValues = new ArrayList<CachedObject>();
+        int i = 0;
+        for (CachedObject object : cacheValues) {
+            object.setAllowUpdateTime(allowUpdateTime);
+            int index = Collections.binarySearch(tempValues, object);
+            if (index < 0) index = ~index;
+            tempValues.add(index, object);
+            tempKeys.add(index, cacheKeys.get(i));
+            i++;
+        }
+        cacheKeys = tempKeys;
+        cacheValues = tempValues;
     }
 
     /**

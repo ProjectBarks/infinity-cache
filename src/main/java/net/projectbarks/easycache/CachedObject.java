@@ -37,7 +37,25 @@ public class CachedObject implements Comparable<CachedObject> {
      * @return the time the object will be deleted.
      */
     @Getter private long updateTime;
-    @Getter(AccessLevel.PROTECTED) protected Long updateTimeExact;
+    /**
+     * The exact time the object is required to be updated by. The difference
+     * between {@link #getUpdateTime()} and this ist updateTime is the amount of
+     * milliseconds one updateTime cycle has while this function is the real
+     * time time.
+     *
+     * @param time the time the object must be updated by.
+     * @return the exact live time.
+     */
+    @Getter(AccessLevel.PUBLIC) @Setter(AccessLevel.PROTECTED) protected long updateTimeExact;
+    /**
+     * If the object supports an update time. This is really only used for
+     * internal purposes. Functions like compare, and getLower require this value
+     * and cant always be passed in from the {@link net.projectbarks.easycache.EasyCache} class.
+     *
+     * @param allow True if update time is supported
+     * @return if update time is supported
+     */
+    @Getter(AccessLevel.PUBLIC) @Setter(AccessLevel.PROTECTED) protected boolean allowUpdateTime;
 
     /**
      * Cached object stores a wide range of data
@@ -47,11 +65,13 @@ public class CachedObject implements Comparable<CachedObject> {
      *
      * @param value serialized value of the object
      * @param lifeTime time the object will be deleted
+     * @param useUpdateTime if the cached object sorts and is deleted by update time along with lifetime.
      */
-    public CachedObject(Object value, Long lifeTime, Long updateTime) {
+    public CachedObject(Object value, long lifeTime, long updateTime, boolean useUpdateTime) {
         this.lifeTime = lifeTime;
         this.updateTime = updateTime;
         this.value = value;
+        this.allowUpdateTime = useUpdateTime;
         update();
     }
 
@@ -93,6 +113,10 @@ public class CachedObject implements Comparable<CachedObject> {
      * @return lower time
      */
     protected Long getLower() {
-        return (lifeTime > updateTimeExact ? updateTimeExact : lifeTime);
+        if (allowUpdateTime) {
+            return lifeTime > updateTimeExact ? updateTimeExact : lifeTime;
+        } else {
+            return lifeTime;
+        }
     }
 }
