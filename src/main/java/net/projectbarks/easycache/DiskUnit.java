@@ -3,9 +3,12 @@ package net.projectbarks.easycache;
 import lombok.Getter;
 
 /**
+ * Disk unit is class based off of {@link java.util.concurrent.TimeUnit} but
+ * for disk space. This class enables for easy conversions and interpretation.
+ * For more information regarding this class look at the method documentation.
+ *
  * Created by brandon on 10/5/14.
  */
-
 public enum DiskUnit {
 
     Byte("b", 1l),

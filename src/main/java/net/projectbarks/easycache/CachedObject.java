@@ -75,9 +75,12 @@ public class CachedObject implements Comparable<CachedObject> {
         update();
     }
 
+
+
+
     @Override
-    public int compareTo(CachedObject o) {
-        return getLower().compareTo(o.getLower());
+    public int compareTo(CachedObject object) {
+        return getLower().compareTo(object.getLower());
 
     }
 
@@ -88,9 +91,8 @@ public class CachedObject implements Comparable<CachedObject> {
 
         CachedObject that = (CachedObject) o;
 
-        if (value != null ? !value.equals(that.value) : that.value != null) return false;
+        return !(value != null ? !value.equals(that.value) : that.value != null);
 
-        return true;
     }
 
     @Override

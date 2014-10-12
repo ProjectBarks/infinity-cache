@@ -104,6 +104,7 @@ public class CacheTest {
 
     @Test
     @UnitInfo(description = "Ensuring enabling update time works")
+    @SuppressWarnings(value = "unchecked")
     public void testEnablingUpdateTime() {
         EasyCache.clearCache();
         EasyCache.setAllowUpdateTime(false);
@@ -126,6 +127,7 @@ public class CacheTest {
         EasyCache.setAllowUpdateTime(true);
     }
 
+    @SuppressWarnings(value = "unchecked")
     private ArrayList<String> getCacheKeys() throws NoSuchFieldException, IllegalAccessException {
         Field cacheKeys = EasyCache.class.getDeclaredField("cacheKeys");
         cacheKeys.setAccessible(true);

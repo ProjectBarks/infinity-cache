@@ -4,21 +4,6 @@ package net.projectbarks.easycache;
  <P>{@code java InitializedObjectUtil}</P>
  **/
 public class Defaults  {
-    public static final void main(String[] igno_red)  {
-        printDefault("boolean");
-        printDefault("char");
-        printDefault("byte");
-        printDefault("short");
-        printDefault("int");
-        printDefault("long");
-        printDefault("float");
-        printDefault("double");
-        printDefault("java.lang.AnythingAndEverythingElse");
-    }
-    private static final void printDefault(String s_type)  {
-        Object oDflt = Defaults.getForClassName(s_type);
-        System.out.println(s_type + " default is \"" + oDflt + "\"");
-    }
     /**
      <P>The default value for a boolean is {@code false}.</P>
 
@@ -98,9 +83,9 @@ public class Defaults  {
      <P>Get an object containing an initialized value for the static class-type.</P>
 
      @param  cls_static  May not be {@code null}.
-     @return
+     @return object for class
      **/
-    public static final Object getForClass(Class cls_static)  {
+    public static Object getForClass(Class cls_static)  {
         try  {
             return  getForClassName(cls_static.getName());
         }  catch(RuntimeException rtx)  {
@@ -127,7 +112,7 @@ public class Defaults  {
      </UL>
      @see  #getForClass(Class) getForClass(cls)
      **/
-    public static final Object getForClassName(String s_type)  {
+    public static Object getForClassName(String s_type)  {
         try  {
             if(s_type.equals("boolean"))  {
                 return  DEFAULT_BOOLEAN;

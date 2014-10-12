@@ -1,16 +1,24 @@
 package net.projectbarks.easycache;
 
 
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import lombok.Getter;
-import lombok.Setter;
 
-import java.nio.charset.Charset;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * Easy cache takes a bunch of scrutinizing tasks and simplifies
+ * it to be easy on the user end. Easy cache supports importing,
+ * and exporting cache. Easy cache is very configurable and manges
+ * itself to reduce ram and CPU usage. Easy cache's primary usage
+ * is for web APIs (such as jersey) where classes do not stay loaded
+ * and temporary information is required to be remember while the server
+ * runs. Please refer to method documentation for information related to
+ * EasyCache.
+ *
  * Created by brandon on 10/4/14.
  */
 public class EasyCache {
@@ -312,7 +320,6 @@ public class EasyCache {
      * if a null object is thrown true is returned
      *
      * @param nulls list of objects to be checked.
-     * @return true if a null object is found in the list.
      */
     private static void isNull(Object... nulls) {
         boolean failed = false;
